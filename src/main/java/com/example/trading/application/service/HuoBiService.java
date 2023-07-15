@@ -25,16 +25,9 @@ public class HuoBiService implements PriceService {
   }
 
   @Override
-  public BidAsk getEthUsdT() {
+  public BidAsk getBidAskOf(String currencyPair) {
     Object responseObject = executeHttpGet();
     var currencyObject = getCurrencyPairObject(responseObject, "ethusdt");
-    return getBidAskFrom(currencyObject);
-  }
-
-  @Override
-  public BidAsk getBtcUsdT() {
-    Object responseObject = executeHttpGet();
-    var currencyObject = getCurrencyPairObject(responseObject, "btcusdt");
     return getBidAskFrom(currencyObject);
   }
 

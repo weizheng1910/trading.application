@@ -4,7 +4,6 @@ import com.example.trading.application.dto.BidAsk;
 
 public interface PriceService {
 
-    BidAsk getEthUsdT();
+    BidAsk getBidAskOf(String currencyPair);
 
-    BidAsk getBtcUsdT();
 }

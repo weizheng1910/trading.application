@@ -4,12 +4,14 @@ import com.example.trading.application.dto.BidAsk;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+@Service
 public class BinanceService implements PriceService{
 
     @Value("${url.binance}")
@@ -23,16 +25,10 @@ public class BinanceService implements PriceService{
     }
 
     @Override
-    public BidAsk getEthUsdT() {
+    public BidAsk getBidAskOf(String currencyPair) {
+        // TODO: If currency pair is not found!
         Object responseObject = executeHttpGet();
-        var currencyObject = getCurrencyPairObject(responseObject,"ethusdt");
-        return getBidAskFrom(currencyObject);
-    }
-
-    @Override
-    public BidAsk getBtcUsdT() {
-        Object responseObject = executeHttpGet();
-        var currencyObject = getCurrencyPairObject(responseObject,"btcusdt");
+        var currencyObject = getCurrencyPairObject(responseObject,currencyPair);
         return getBidAskFrom(currencyObject);
     }
 
