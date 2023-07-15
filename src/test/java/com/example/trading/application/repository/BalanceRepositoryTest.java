@@ -39,4 +39,6 @@ public class BalanceRepositoryTest {
         assertThat(persistedBalance.getEthAmount()).isEqualTo(eth);
 
     }
+
+
 }
