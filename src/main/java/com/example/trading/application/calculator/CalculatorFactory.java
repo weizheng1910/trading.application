@@ -8,7 +8,7 @@ public class CalculatorFactory {
     public static TransactionCalculator getCalculator(Balance balance, String currencyPair){
         return switch(currencyPair){
             case CurrPair.ETHUSDT -> new EthUsdtCalculator(balance);
-            // case CurrPair.BTCUSDT -> new BtcUsdtCalculator(balance);
+            case CurrPair.BTCUSDT -> new BtcUsdtCalculator(balance);
             default -> throw new IllegalStateException("Unexpected value: " + currencyPair);
         };
     }

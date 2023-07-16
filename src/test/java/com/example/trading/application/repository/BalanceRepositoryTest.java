@@ -51,8 +51,6 @@ public class BalanceRepositoryTest {
         balance.setEthAmount(BigDecimal.ZERO);
         balance.setBtcAmount(BigDecimal.ZERO);
 
-        balanceRepository.save(balance);
-
         var balance1 = new Balance();
         balance1.setUsername("Peter");
         balance1.setUsdAmount(BigDecimal.ONE);

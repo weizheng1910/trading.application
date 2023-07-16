@@ -30,4 +30,10 @@ public class Balance {
 
     @CreationTimestamp
     private LocalDateTime createDateTime;
+
+    @Override
+    public String toString(){
+        return String.format("Balance - User: %s, USD: %s, ETH: %s, BTC: %s", username, usdAmount,
+                ethAmount, btcAmount);
+    }
 }
