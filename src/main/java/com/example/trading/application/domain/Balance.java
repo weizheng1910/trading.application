@@ -22,11 +22,11 @@ public class Balance {
 
     private String username;
 
-    private BigDecimal usdAmount;
+    private BigDecimal usdAmount = BigDecimal.ZERO;
 
-    private BigDecimal ethAmount;
+    private BigDecimal ethAmount = BigDecimal.ZERO;
 
-    private BigDecimal btcAmount;
+    private BigDecimal btcAmount = BigDecimal.ZERO;
 
     @CreationTimestamp
     private LocalDateTime createDateTime;

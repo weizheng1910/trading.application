@@ -3,6 +3,7 @@ package com.example.trading.application.controller;
 import com.example.trading.application.calculator.CalculatorFactory;
 import com.example.trading.application.domain.Balance;
 import com.example.trading.application.domain.CurrencyPair;
+import com.example.trading.application.domain.Transaction;
 import com.example.trading.application.dto.TxnRequest;
 import com.example.trading.application.repository.*;
 import jakarta.validation.Valid;
@@ -39,14 +40,13 @@ public class AppController {
 
         // Calculate Buy Sell
         T repo = (T) currencyPairRepositoryFactory.getRepository(txnReq.getPair());
-        var pair = repo.findTopByOrderByIdDesc();
+        var latestBestPrice = repo.findTopByOrderByIdDesc();
 
         var calculator = CalculatorFactory.getCalculator(balance, txnReq.getPair());
-        var newTransaction = calculator.calculateNewTransaction(txnReq, pair);
-        var newBalance = calculator.calculateNewBalance(txnReq, pair);
+        var output = calculator.returnNewBalanceAndTransaction(txnReq, latestBestPrice);
 
-        transactionRepository.save(newTransaction);
-        balanceRepository.save(newBalance);
+        balanceRepository.save((Balance) output[0]);
+        transactionRepository.save((Transaction) output[1]);
 
         return "SUCCESS";
     }

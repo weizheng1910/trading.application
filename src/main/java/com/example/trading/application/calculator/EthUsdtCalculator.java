@@ -5,10 +5,11 @@ import com.example.trading.application.domain.Balance;
 import com.example.trading.application.domain.CurrencyPair;
 import com.example.trading.application.domain.Transaction;
 import com.example.trading.application.dto.TxnRequest;
+import com.example.trading.application.exception.InsufficientBalanceException;
 
 import java.math.BigDecimal;
 
-public class EthUsdtCalculator implements BalanceCalculator {
+public class EthUsdtCalculator implements TransactionCalculator {
 
   private Balance balance;
 
@@ -17,11 +18,9 @@ public class EthUsdtCalculator implements BalanceCalculator {
     this.balance = balance;
   }
 
-  @Override
-  public Balance calculateNewBalance(TxnRequest txnRequest, CurrencyPair bidAsk) {
+  Balance calculateNewBalance(TxnRequest txnRequest, CurrencyPair bidAsk) {
 
     boolean isBuy = txnRequest.getOrder().equalsIgnoreCase("BUY");
-
     var rateToUse = isBuy ? bidAsk.getBid() : bidAsk.getAsk();
     var corrAmount = rateToUse.multiply(txnRequest.getAmount());
 
@@ -29,7 +28,7 @@ public class EthUsdtCalculator implements BalanceCalculator {
       var newEthBalance = balance.getEthAmount().add(txnRequest.getAmount());
       var newUsdBalance = balance.getUsdAmount().subtract(corrAmount);
       if (newUsdBalance.compareTo(BigDecimal.ZERO) < 0) {
-        throw new RuntimeException("USD Balance falls lower than zero!");
+        throw new InsufficientBalanceException("USD Balance falls lower than zero!");
       }
 
       return returnNewBalance(newEthBalance, newUsdBalance);
@@ -38,17 +37,16 @@ public class EthUsdtCalculator implements BalanceCalculator {
     var newUsdBalance = balance.getUsdAmount().add(corrAmount);
     var newEthBalance = balance.getEthAmount().subtract(txnRequest.getAmount());
     if (newEthBalance.compareTo(BigDecimal.ZERO) < 0) {
-      throw new RuntimeException("ETH Balance falls lower than zero!");
+      throw new InsufficientBalanceException("ETH Balance falls lower than zero!");
     }
 
     return returnNewBalance(newEthBalance, newUsdBalance);
   }
 
-  @Override
-  public Transaction calculateNewTransaction(TxnRequest txnRequest, CurrencyPair bidAsk) {
+  Transaction calculateNewTransaction(TxnRequest txnRequest, CurrencyPair bidAsk) {
 
-    boolean isBuy = txnRequest.getOrder().equalsIgnoreCase("BUY");
-    var rateToUse = isBuy ? bidAsk.getBid() : bidAsk.getAsk();
+    boolean isBuyOrder = txnRequest.getOrder().equalsIgnoreCase("BUY");
+    var rateToUse = isBuyOrder ? bidAsk.getBid() : bidAsk.getAsk();
     var corrAmount = rateToUse.multiply(txnRequest.getAmount());
 
     var txn = new Transaction();
@@ -57,20 +55,32 @@ public class EthUsdtCalculator implements BalanceCalculator {
     txn.setRate(rateToUse);
     txn.setPair(CurrPair.ETHUSDT);
 
-    txn.setBuyCurrency(isBuy ? "ETH" : "USDT");
-    txn.setBuyAmount(isBuy ? txnRequest.getAmount() : corrAmount);
+    txn.setBuyCurrency(isBuyOrder ? "ETH" : "USDT");
+    txn.setBuyAmount(isBuyOrder ? txnRequest.getAmount() : corrAmount);
 
-    txn.setSellCurrency(!isBuy ? "ETH" : "USDT");
-    txn.setSellAmount(!isBuy ? txnRequest.getAmount(): corrAmount);
+    txn.setSellCurrency(!isBuyOrder ? "ETH" : "USDT");
+    txn.setSellAmount(!isBuyOrder ? txnRequest.getAmount(): corrAmount);
 
-    return null;
+    return txn;
+  }
+
+  @Override
+  public Object[] returnNewBalanceAndTransaction(TxnRequest txnRequest, CurrencyPair bidAsk){
+
+    var balance = calculateNewBalance(txnRequest, bidAsk);
+    var txn = calculateNewTransaction(txnRequest, bidAsk);
+
+    return new Object[]{balance, txn};
   }
 
   private Balance returnNewBalance(BigDecimal newEthBalance, BigDecimal newUsdBalance) {
+
     var newBalance = new Balance();
-    newBalance.setBtcAmount(balance.getBtcAmount());
     newBalance.setEthAmount(newEthBalance);
     newBalance.setUsdAmount(newUsdBalance);
+
+    newBalance.setBtcAmount(balance.getBtcAmount());
+    newBalance.setUsername(balance.getUsername());
     return newBalance;
   }
 }

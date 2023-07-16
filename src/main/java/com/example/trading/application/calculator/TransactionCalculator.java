@@ -6,8 +6,7 @@ import com.example.trading.application.domain.Transaction;
 import com.example.trading.application.dto.TxnRequest;
 
 
-public interface BalanceCalculator {
-    Balance calculateNewBalance(TxnRequest txnRequest, CurrencyPair bidAsk);
+public interface TransactionCalculator {
 
-    Transaction calculateNewTransaction(TxnRequest txnRequest, CurrencyPair bidAsk);
+    Object[] returnNewBalanceAndTransaction(TxnRequest txnRequest, CurrencyPair bidAsk);
 }

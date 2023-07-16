@@ -5,7 +5,7 @@ import com.example.trading.application.domain.Balance;
 
 public class CalculatorFactory {
 
-    public static BalanceCalculator getCalculator(Balance balance, String currencyPair){
+    public static TransactionCalculator getCalculator(Balance balance, String currencyPair){
         return switch(currencyPair){
             case CurrPair.ETHUSDT -> new EthUsdtCalculator(balance);
             // case CurrPair.BTCUSDT -> new BtcUsdtCalculator(balance);
