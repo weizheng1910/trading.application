@@ -44,7 +44,7 @@ public class AppController {
 
     var balance =
         balanceRepository
-            .findTopByUsernameOrderByCreateDateTimeDesc(username)
+            .findLatestBalanceByUsername(username)
             .orElseThrow(
                 () -> new BalanceNotFoundException("Please create new account for : " + username));
 
@@ -57,7 +57,7 @@ public class AppController {
 
     var balance =
         balanceRepository
-            .findTopByUsernameOrderByCreateDateTimeDesc(txnReq.getUsername())
+            .findLatestBalanceByUsername(txnReq.getUsername())
             .orElseThrow(
                 () ->
                     new BalanceNotFoundException(

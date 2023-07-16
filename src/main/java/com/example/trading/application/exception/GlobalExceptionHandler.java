@@ -17,6 +17,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public String handleException(BalanceNotFoundException e){
+        return e.getMessage();
+    }
+
+    @ExceptionHandler
     public String handleException(ConstraintViolationException e){
         var msg= e.getMessage().split(":");
         return msg[1];

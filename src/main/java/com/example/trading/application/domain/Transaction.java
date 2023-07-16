@@ -38,5 +38,11 @@ public class Transaction {
     @UpdateTimestamp
     private LocalDateTime updateDateTime;
 
+    @Override
+    public String toString(){
+        return String.format("Transaction - id: %s, buyCurrency: %s, buyAmt: %s, sellCurrency: %s, sellAmt: %s, pair: %s, rate: %s, user: %s, time: %s ",
+                id, buyCurrency, buyAmount, sellCurrency, sellAmount, pair, rate, username, createDateTime);
+    }
+
 
 }

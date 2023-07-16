@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {HuoBiService.class, BinanceService.class})
-public class HuoBiServiceTest {
+public class PriceServiceTest {
   @Autowired HuoBiService huoBiService;
 
   @Autowired BinanceService binanceService;

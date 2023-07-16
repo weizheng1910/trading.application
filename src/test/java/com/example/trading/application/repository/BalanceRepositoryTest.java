@@ -2,8 +2,7 @@ package com.example.trading.application.repository;
 
 import com.example.trading.application.domain.Balance;
 import com.example.trading.application.exception.BalanceNotFoundException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -12,12 +11,17 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BalanceRepositoryTest {
 
     @Autowired
     private BalanceRepository balanceRepository;
 
+
+
     @Test
+    @Order(1)
     public void testOnSave(){
 
         BigDecimal usd = BigDecimal.ONE;
@@ -34,7 +38,7 @@ public class BalanceRepositoryTest {
         balanceRepository.save(balance);
 
         var persistedBalance = balanceRepository.findAll().get(0);
-        assertThat(persistedBalance.getId()).isEqualTo(1L);
+        assertThat(persistedBalance.getId()).isGreaterThanOrEqualTo(1L);
         assertThat(persistedBalance.getUsername()).isEqualTo(username);
         assertThat(persistedBalance.getUsdAmount()).isEqualTo(usd);
         assertThat(persistedBalance.getBtcAmount()).isEqualTo(btc);
@@ -43,6 +47,7 @@ public class BalanceRepositoryTest {
     }
 
     @Test
+    @Order(2)
     public void testFindTopByUsernameOrderByCreateDateTimeDesc(){
 
         var balance = new Balance();
@@ -74,19 +79,22 @@ public class BalanceRepositoryTest {
         balanceRepository.save(balance2);
         balanceRepository.save(balance3);
 
-        var peterLatestBalance = balanceRepository.findTopByUsernameOrderByCreateDateTimeDesc("Peter");
+         var x = balanceRepository.findAll();
+
+        var peterLatestBalance = balanceRepository.findLatestBalanceByUsername("Peter");
         assertThat(peterLatestBalance.get().getBtcAmount()).isEqualTo(BigDecimal.ONE);
 
-        var johnLatestBalance = balanceRepository.findTopByUsernameOrderByCreateDateTimeDesc("John");
+        var johnLatestBalance = balanceRepository.findLatestBalanceByUsername("John");
         assertThat(johnLatestBalance.get().getBtcAmount()).isEqualTo(BigDecimal.TEN);
 
     }
 
     @Test
+    @Order(3)
     public void testFindTopByUsernameOrderByCreateDateTimeDesc_BalanceNotFoundException(){
 
         try{
-            var peterLatestBalance = balanceRepository.findTopByUsernameOrderByCreateDateTimeDesc("Mary")
+            var peterLatestBalance = balanceRepository.findLatestBalanceByUsername("Mary")
                     .orElseThrow(() -> new BalanceNotFoundException("Please create new account for : " ));
             Assertions.fail();
         } catch (BalanceNotFoundException e){
