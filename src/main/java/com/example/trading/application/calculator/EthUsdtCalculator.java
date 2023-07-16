@@ -13,18 +13,17 @@ public class EthUsdtCalculator implements TransactionCalculator {
 
   private Balance balance;
 
-  // TO-DO if balance is null
   public EthUsdtCalculator(Balance balance) {
     this.balance = balance;
   }
 
   Balance calculateNewBalance(TxnRequest txnRequest, CurrencyPair bidAsk) {
 
-    boolean isBuy = txnRequest.getOrder().equalsIgnoreCase("BUY");
-    var rateToUse = isBuy ? bidAsk.getBid() : bidAsk.getAsk();
+    boolean isBuyOrder = txnRequest.getOrder().equalsIgnoreCase("BUY");
+    var rateToUse = isBuyOrder ? bidAsk.getBid() : bidAsk.getAsk();
     var corrAmount = rateToUse.multiply(txnRequest.getAmount());
 
-    if (isBuy) {
+    if (isBuyOrder) {
       var newEthBalance = balance.getEthAmount().add(txnRequest.getAmount());
       var newUsdBalance = balance.getUsdAmount().subtract(corrAmount);
       if (newUsdBalance.compareTo(BigDecimal.ZERO) < 0) {

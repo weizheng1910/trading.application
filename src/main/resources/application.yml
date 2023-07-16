@@ -10,4 +10,3 @@ spring:
 url:
   binance: https://api.binance.com/api/v3/ticker/bookTicker
   huobi: https://api.huobi.pro/market/tickers
-host:
