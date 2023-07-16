@@ -5,6 +5,7 @@ import com.example.trading.application.domain.Balance;
 import com.example.trading.application.domain.CurrencyPair;
 import com.example.trading.application.domain.Transaction;
 import com.example.trading.application.dto.TxnRequest;
+import com.example.trading.application.exception.BalanceNotFoundException;
 import com.example.trading.application.repository.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,9 @@ public class AppController {
     public @ResponseBody<T extends CurrencyPairRepository> String executeTransaction(@Valid @RequestBody TxnRequest txnReq){
 
         // Read Input
-        Balance balance = new Balance(); // findLatestBalanceByUser; OrElseThrow
+        Balance balance = balanceRepository.findTopByUsernameOrderByCreateDateTimeDesc(txnReq.getUsername())
+                .orElseThrow(() -> new BalanceNotFoundException("Please create new account for : " + txnReq.getUsername()));
 
-        // Calculate Buy Sell
         T repo = (T) currencyPairRepositoryFactory.getRepository(txnReq.getPair());
         var latestBestPrice = repo.findTopByOrderByIdDesc();
 
