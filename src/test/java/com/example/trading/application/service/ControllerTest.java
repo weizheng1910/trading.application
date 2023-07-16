@@ -25,120 +25,129 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ControllerTest {
 
-    @Value(value="${local.server.port}")
-    private int port;
+  @Value(value = "${local.server.port}")
+  private int port;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+  @Autowired private TestRestTemplate restTemplate;
 
-    @Autowired
-    private BtcUsdtPairRepository btcUsdtPairRepository;
+  @Autowired private BtcUsdtPairRepository btcUsdtPairRepository;
 
-    @Autowired
-    private EthUsdtPairRepository ethUsdtPairRepository;
+  @Autowired private EthUsdtPairRepository ethUsdtPairRepository;
 
-    @Autowired
-    private CurrencyPairRepositoryFactory currencyPairRepositoryFactory;
+  @Autowired private CurrencyPairRepositoryFactory currencyPairRepositoryFactory;
 
-    String url;
-    String postTransactUrl;
+  String url;
+  String postTransactUrl;
 
-    @PostConstruct
-    private void setUrl(){
-        url =  "http://localhost:" + port;
-        postTransactUrl = url + "/transact";
-    }
+  @PostConstruct
+  private void setUrl() {
+    url = "http://localhost:" + port;
+    postTransactUrl = url + "/transact";
+  }
 
-    @Test
-    public void getLatestRate() throws Exception {
+  @Test
+  public void getLatestRate() throws Exception {
 
-        populateDataInDb();
+    populateDataInDb();
 
-        URI uri = UriComponentsBuilder.fromHttpUrl(url).path("/")
-                .queryParam("currencyPair", "BtcUsdt").build().toUri();
+    URI uri =
+        UriComponentsBuilder.fromHttpUrl(url)
+            .path("/price")
+            .queryParam("currencyPair", "BtcUsdt")
+            .build()
+            .toUri();
 
-        assertThat(this.restTemplate.getForObject(uri,
-                String.class)).isEqualTo(BigDecimal.ZERO);
-    }
+    assertThat(this.restTemplate.getForObject(uri, String.class))
+        .isEqualTo("Best Bid: 0.00, Best Ask: 0.00");
+  }
 
-    @Test
-    public void testImproperTransactionInputIn() throws JSONException {
+  @Test
+  public void getLatestRate_ImproperInput() throws Exception {
 
-        var txnRequest = new TxnRequest();
-        txnRequest.setAmount(BigDecimal.TEN);
-        txnRequest.setOrder("dsfs");
-        txnRequest.setPair("df");
+    populateDataInDb();
 
-        String response =
-                restTemplate.postForObject(postTransactUrl, txnRequest, String.class);
+    URI uri =
+        UriComponentsBuilder.fromHttpUrl(url)
+            .path("/price")
+            .queryParam("currencyPair", "f6gkr")
+            .build()
+            .toUri();
 
-        assertThat(response).contains("Valid values are");
+    assertThat(this.restTemplate.getForObject(uri, String.class))
+        .isEqualTo(" Valid request parameter values are \"BtcUsdt\" or \"EtcUsdt\"");
+  }
 
-    }
+  @Test
+  public void testImproperTransactionInputIn() throws JSONException {
 
-    @Test
-    public void testImproperTransactionInputIn_2() throws JSONException {
+    var txnRequest = new TxnRequest();
+    txnRequest.setAmount(BigDecimal.TEN);
+    txnRequest.setOrder("dsfs");
+    txnRequest.setPair("df");
 
-        var txnRequest = new TxnRequest();
-        txnRequest.setAmount(BigDecimal.TEN);
-        txnRequest.setOrder(null);
-        txnRequest.setPair("BtcUsdt");
+    String response = restTemplate.postForObject(postTransactUrl, txnRequest, String.class);
 
+    assertThat(response).contains("Valid values are");
+  }
 
-        String response =
-                restTemplate.postForObject(postTransactUrl, txnRequest, String.class);
+  @Test
+  public void testImproperTransactionInputIn_2() throws JSONException {
 
-        assertThat(response).contains("Valid values are");
+    var txnRequest = new TxnRequest();
+    txnRequest.setAmount(BigDecimal.TEN);
+    txnRequest.setOrder(null);
+    txnRequest.setPair("BtcUsdt");
 
-    }
+    String response = restTemplate.postForObject(postTransactUrl, txnRequest, String.class);
 
-    @Test
-    public void testProperTransactionInput() throws JSONException {
+    assertThat(response).contains("Valid values are");
+  }
 
-        var txnRequest = new TxnRequest();
-        txnRequest.setAmount(new BigDecimal("1234.12"));
-        txnRequest.setPair("BtcUsdt");
-        txnRequest.setOrder("BUY");
+  @Test
+  public void testProperTransactionInput() throws JSONException {
 
-        String response =
-                restTemplate.postForObject(postTransactUrl, txnRequest, String.class);
+    var txnRequest = new TxnRequest();
+    txnRequest.setAmount(new BigDecimal("1234.12"));
+    txnRequest.setPair("BtcUsdt");
+    txnRequest.setOrder("BUY");
 
-        assertThat(response).isEqualTo("SUCCESS");
+    String response = restTemplate.postForObject(postTransactUrl, txnRequest, String.class);
 
-    }
+    assertThat(response).isEqualTo("SUCCESS");
+  }
 
-    private void populateDataInDb() {
+  private void populateDataInDb() {
 
-        var pair = new BtcUsdtPair();
-        pair.setAsk(BigDecimal.ONE);
-        pair.setBid(BigDecimal.ONE);
+    var pair = new BtcUsdtPair();
+    pair.setAsk(BigDecimal.ONE);
+    pair.setBid(BigDecimal.ONE);
 
-        var pair1 = new BtcUsdtPair();
-        pair1.setAsk(BigDecimal.TEN);
-        pair1.setBid(BigDecimal.TEN);
+    var pair1 = new BtcUsdtPair();
+    pair1.setAsk(BigDecimal.TEN);
+    pair1.setBid(BigDecimal.TEN);
 
-        var pair2 = new BtcUsdtPair();
-        pair2.setAsk(BigDecimal.ZERO);
-        pair2.setBid(BigDecimal.ZERO);
+    var pair2 = new BtcUsdtPair();
+    pair2.setAsk(BigDecimal.ZERO);
+    pair2.setBid(BigDecimal.ZERO);
 
-        var pairA = new EthUsdtPair();
-        pairA.setAsk(BigDecimal.ONE);
-        pairA.setBid(BigDecimal.ONE);
+    var pairA = new EthUsdtPair();
+    pairA.setAsk(BigDecimal.ONE);
+    pairA.setBid(BigDecimal.ONE);
 
-        var pairB = new EthUsdtPair();
-        pairB.setAsk(BigDecimal.TEN);
-        pairB.setBid(BigDecimal.TEN);
+    var pairB = new EthUsdtPair();
+    pairB.setAsk(BigDecimal.TEN);
+    pairB.setBid(BigDecimal.TEN);
 
-        var pairC = new EthUsdtPair();
-        pairC.setAsk(new BigDecimal("999"));
-        pairC.setBid(new BigDecimal("999"));
+    var pairC = new EthUsdtPair();
+    pairC.setAsk(new BigDecimal("999"));
+    pairC.setBid(new BigDecimal("999"));
 
-        btcUsdtPairRepository.save(pair);
-        btcUsdtPairRepository.save(pair1);
-        btcUsdtPairRepository.save(pair2);
+    btcUsdtPairRepository.save(pair);
+    btcUsdtPairRepository.save(pair1);
+    btcUsdtPairRepository.save(pair2);
 
-        ethUsdtPairRepository.save(pairA);
-        ethUsdtPairRepository.save(pairB);
-        ethUsdtPairRepository.save(pairC);
-    }
+    ethUsdtPairRepository.save(pairA);
+    ethUsdtPairRepository.save(pairB);
+    ethUsdtPairRepository.save(pairC);
+  }
 }

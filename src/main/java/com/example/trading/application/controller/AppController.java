@@ -8,51 +8,57 @@ import com.example.trading.application.dto.TxnRequest;
 import com.example.trading.application.exception.BalanceNotFoundException;
 import com.example.trading.application.repository.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 public class AppController {
 
-    @Autowired
-    CurrencyPairRepositoryFactory currencyPairRepositoryFactory;
+  @Autowired CurrencyPairRepositoryFactory currencyPairRepositoryFactory;
 
-    @Autowired
-    TransactionRepository transactionRepository;
+  @Autowired TransactionRepository transactionRepository;
 
-    @Autowired
-    BalanceRepository balanceRepository;
+  @Autowired BalanceRepository balanceRepository;
 
+  @RequestMapping("/price")
+  public @ResponseBody <T extends CurrencyPairRepository> String getBestPrice(
+      @RequestParam
+          @Pattern(
+              regexp = "BtcUsdt|EthUsdt",
+              message = "Valid request parameter values are \"BtcUsdt\" or \"EtcUsdt\"")
+          String currencyPair) {
 
-    @RequestMapping("/price")
-    public @ResponseBody<T extends CurrencyPairRepository>  String getBestPrice(@RequestParam String currencyPair) {
-        // TO-DO request param check
-        T repo = (T) currencyPairRepositoryFactory.getRepository(currencyPair);
-        var pair = repo.findTopByOrderByIdDesc();
-        return String.format("Best Bid: %s, Best Ask: %s", pair.getBid().toString(), pair.getAsk().toString());
-    }
+    var repo = (T) currencyPairRepositoryFactory.getRepository(currencyPair);
+    var pair = repo.findTopByOrderByIdDesc();
+    return String.format(
+        "Best Bid: %s, Best Ask: %s", pair.getBid().toString(), pair.getAsk().toString());
+  }
 
-    @PostMapping("/transact")
-    public @ResponseBody<T extends CurrencyPairRepository> String executeTransaction(@Valid @RequestBody TxnRequest txnReq){
+  @PostMapping("/transact")
+  public @ResponseBody <T extends CurrencyPairRepository> String executeTransaction(
+      @Valid @RequestBody TxnRequest txnReq) {
 
-        // Read Input
-        Balance balance = balanceRepository.findTopByUsernameOrderByCreateDateTimeDesc(txnReq.getUsername())
-                .orElseThrow(() -> new BalanceNotFoundException("Please create new account for : " + txnReq.getUsername()));
+    var balance =
+        balanceRepository
+            .findTopByUsernameOrderByCreateDateTimeDesc(txnReq.getUsername())
+            .orElseThrow(
+                () ->
+                    new BalanceNotFoundException(
+                        "Please create new account for : " + txnReq.getUsername()));
 
-        T repo = (T) currencyPairRepositoryFactory.getRepository(txnReq.getPair());
-        var latestBestPrice = repo.findTopByOrderByIdDesc();
+    var repo = (T) currencyPairRepositoryFactory.getRepository(txnReq.getPair());
+    var latestBestPrice = repo.findTopByOrderByIdDesc();
 
-        var calculator = CalculatorFactory.getCalculator(balance, txnReq.getPair());
-        var output = calculator.returnNewBalanceAndTransaction(txnReq, latestBestPrice);
+    var calculator = CalculatorFactory.getCalculator(balance, txnReq.getPair());
+    var output = calculator.returnNewBalanceAndTransaction(txnReq, latestBestPrice);
 
-        balanceRepository.save((Balance) output[0]);
-        transactionRepository.save((Transaction) output[1]);
+    balanceRepository.save((Balance) output[0]);
+    transactionRepository.save((Transaction) output[1]);
 
-        return "SUCCESS";
-    }
-
-
-
-
+    return "SUCCESS";
+  }
 }

@@ -13,19 +13,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.data.util.Predicates.isTrue;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class CurrencyPairRepositoryFactoryTest {
 
     @Autowired
     CurrencyPairRepositoryFactory currencyPairRepositoryFactory;
 
-    @Autowired
-    ApplicationContext applicationContext;
-
     @Test
-    public void test(){
-        var x = currencyPairRepositoryFactory.getRepository(CurrPair.ETHUSDT);
-        assertThat(x instanceof EthUsdtPairRepository).isTrue();
+    public void testCurrencyPairRepositoryFactory(){
+        var repository = currencyPairRepositoryFactory.getRepository(CurrPair.ETHUSDT);
+        assertThat(repository instanceof EthUsdtPairRepository).isTrue();
+        var repository1 = currencyPairRepositoryFactory.getRepository(CurrPair.BTCUSDT);
+        assertThat(repository1 instanceof BtcUsdtPairRepository).isTrue();
     }
 
 }
