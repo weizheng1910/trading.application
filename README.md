@@ -1,7 +1,5 @@
-## Assumptions and Alternatives
+## Trading App
 
 
-### Alternatives
-* Instead of 
-* Can refactor to accept a general currencyPair
-* 
+### Future Improvements
+* Separate scheduler task into separate threadpool.
