@@ -1,5 +1,10 @@
 # Trading Application 
 
+* Periodically pull pricing from Binance and Huobi, and store the best pricing in the database.
+* Allows user to query for the best aggrate
+
+
+
 Price aggregation from the source below:
 Binance
 Url : https://api.binance.com/api/v3/ticker/bookTicker
