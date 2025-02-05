@@ -2,6 +2,7 @@ package com.example.trading.application.service;
 
 import com.example.trading.application.dto.BidAsk;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,8 @@ public class BinanceService implements PriceService{
 
     @Value("${url.binance}")
     public String baseUrl;
-
+    @Autowired
     private WebClient webClient;
-
-    @PostConstruct
-    private void initClient() {
-        webClient = WebClient.builder().baseUrl(baseUrl).build();
-    }
 
     @Override
     public BidAsk getBidAskOf(String currencyPair) {
@@ -48,7 +44,7 @@ public class BinanceService implements PriceService{
     private Object executeHttpGet() {
         Object object = webClient
                 .get()
-                .uri(uriBuilder -> uriBuilder.build())
+                .uri(baseUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Object.class)
